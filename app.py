@@ -2,6 +2,7 @@
 import os
 from flask import  Flask, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
+# import additional libraries below
 import cv2
 import numpy as np
 
@@ -20,9 +21,8 @@ def upload_image():
     filename = secure_filename(file.filename)
 
     file_data = make_grayscale(file.read())
-    with open(os.path.join('static/', filename),
-              'wb') as f:
-        f.write(file_data)
+    with open(os.path.join('static/', filename), 'wb') as f:
+    	f.write(file_data)
 
     display_message = 'Image successfully uploaded and displayed below'
     return render_template('upload.html', filename=filename, message = display_message)
@@ -30,20 +30,17 @@ def upload_image():
 
 
 def make_grayscale(input_image):
+	image_array = np.fromstring(input_image, dtype='uint8')
+	print('Image Array', image_array)
 
-    image_array = np.fromstring(input_image, dtype='uint8')
-    print('Image Array:',image_array)
+	decode_array_to_image = cv2.imdecode(image_array,cv2.IMREAD_UNCHANGED)
+	print('Decode values of image', decode_array_to_image)
 
-    # decode the array into an image
-    decode_array_to_img = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
-    print('Decode values of Image:', decode_array_to_img)
+	converted_gray_img = cv2.cvtColor(decode_array_to_image, cv2.COLOR_RGB2GRAY)
+	status, output_image = cv2.imencode('.PNG', converted_gray_img)
+	print('Status: ', status)
 
-    # Make grayscale
-    converted_gray_img = cv2.cvtColor(decode_array_to_img, cv2.COLOR_RGB2GRAY)
-    status, output_image = cv2.imencode('.PNG', converted_gray_img)
-    print('Status:',status)
-
-    return output_image
+	return output_image
 
 
 @app.route('/display/<filename>')
